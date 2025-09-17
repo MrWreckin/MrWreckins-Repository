@@ -1,13 +1,20 @@
 import streamlit as st
+import requests
+import pandas as pd
+import time
 
-# --- Streamlit UI ---
+# ... your functions fetch_markets(), is_listed_on_coinbase(), load_data() here ...
+
 st.title("Coinbase Coins Momentum Ranking")
 st.write("Weighted Score = 50% 1h + 30% 24h + 20% 30d")
 
+# Refresh button clears cache
 if st.button("Refresh Data"):
     st.cache_data.clear()
 
-df = load_data()
+# ⬇️ Only call load_data() here, after the UI is loaded
+with st.spinner("Loading data from CoinGecko..."):
+    df = load_data()
 
 # Sorting options
 sort_col = st.selectbox(
