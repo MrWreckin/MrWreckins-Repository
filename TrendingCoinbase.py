@@ -1,3 +1,11 @@
+import streamlit as st
+
+st.set_page_config(
+    page_title="Trending Coinbase App",
+    page_icon="📈"  # Optional: adds a little chart icon to the browser tab
+)
+
+
 # --- Streamlit UI ---
 st.title("Coinbase Coins Momentum Ranking")
 st.write("Weighted Score = 50% 1h + 30% 24h + 20% 30d")
