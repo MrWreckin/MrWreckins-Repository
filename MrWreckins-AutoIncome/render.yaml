@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: mrwreckins-autoincome
+    env: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    autoDeploy: true
+    disk:
+      name: autoincome-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 2
+    envVars:
+      - key: DISABLE_AUTOMATION
+        value: "1"
+      - key: OPENAI_API_KEY
+        sync: false
