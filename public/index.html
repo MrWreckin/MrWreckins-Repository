@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MrWreckins WreckShop - Autonomous Income Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-wrench"></i>
+                    <h1>MrWreckins WreckShop</h1>
+                    <span class="subtitle">Autonomous Income System</span>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Revenue</span>
+                        <span class="stat-value" id="totalRevenue">$0.00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active Streams</span>
+                        <span class="stat-value" id="activeStreams">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">System Status</span>
+                        <span class="stat-value status-indicator" id="systemStatus">
+                            <i class="fas fa-circle"></i> Online
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="overview">
+                    <i class="fas fa-tachometer-alt"></i> Overview
+                </button>
+                <button class="nav-tab" data-tab="trends">
+                    <i class="fas fa-chart-line"></i> Trends
+                </button>
+                <button class="nav-tab" data-tab="opportunities">
+                    <i class="fas fa-lightbulb"></i> Opportunities
+                </button>
+                <button class="nav-tab" data-tab="streams">
+                    <i class="fas fa-stream"></i> Income Streams
+                </button>
+                <button class="nav-tab" data-tab="products">
+                    <i class="fas fa-box"></i> Products
+                </button>
+                <button class="nav-tab" data-tab="customers">
+                    <i class="fas fa-users"></i> Customers
+                </button>
+                <button class="nav-tab" data-tab="automation">
+                    <i class="fas fa-robot"></i> Automation
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview">
+                <div class="overview-grid">
+                    <!-- Key Metrics -->
+                    <div class="metric-cards">
+                        <div class="metric-card revenue">
+                            <div class="metric-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Total Revenue</h3>
+                                <p class="metric-value" id="overviewRevenue">$0.00</p>
+                                <span class="metric-change positive">+0% this month</span>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card profit">
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Net Profit</h3>
+                                <p class="metric-value" id="overviewProfit">$0.00</p>
+                                <span class="metric-change positive">+0% this month</span>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card streams">
+                            <div class="metric-icon">
+                                <i class="fas fa-stream"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Active Streams</h3>
+                                <p class="metric-value" id="overviewStreams">0</p>
+                                <span class="metric-change neutral">0 new this week</span>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card roi">
+                            <div class="metric-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Average ROI</h3>
+                                <p class="metric-value" id="overviewROI">0%</p>
+                                <span class="metric-change positive">Target: 150%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="chart-container">
+                        <div class="chart-card">
+                            <h3>Revenue Trend (30 Days)</h3>
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Income Stream Performance</h3>
+                            <canvas id="streamChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="activity-feed">
+                        <h3>Recent Activity</h3>
+                        <div class="activity-list" id="activityList">
+                            <div class="activity-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>System initialized - Ready to start scanning trends</span>
+                                <time>Just now</time>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trends Tab -->
+            <div class="tab-content" id="trends">
+                <div class="trends-header">
+                    <h2>Trending Keywords & Opportunities</h2>
+                    <button class="btn btn-primary" id="scanTrendsBtn">
+                        <i class="fas fa-search"></i> Scan New Trends
+                    </button>
+                </div>
+                <div class="trends-grid">
+                    <div class="trends-list" id="trendsList">
+                        <div class="loading-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading trends...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opportunities Tab -->
+            <div class="tab-content" id="opportunities">
+                <div class="opportunities-header">
+                    <h2>Business Opportunities</h2>
+                    <div class="filter-controls">
+                        <select id="opportunityFilter">
+                            <option value="all">All Opportunities</option>
+                            <option value="high">High Profit Potential</option>
+                            <option value="low-investment">Low Investment</option>
+                            <option value="pending">Pending Implementation</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="opportunities-grid" id="opportunitiesGrid">
+                    <div class="loading-state">
+                        <i class="fas fa-lightbulb"></i>
+                        <p>Analyzing trends for opportunities...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Streams Tab -->
+            <div class="tab-content" id="streams">
+                <div class="streams-header">
+                    <h2>Income Streams</h2>
+                    <button class="btn btn-success" id="createStreamBtn">
+                        <i class="fas fa-plus"></i> Create New Stream
+                    </button>
+                </div>
+                <div class="streams-grid" id="streamsGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-stream"></i>
+                        <p>No income streams yet. Create your first stream from trending opportunities!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div class="tab-content" id="products">
+                <div class="products-header">
+                    <h2>Product Listings</h2>
+                    <div class="product-stats">
+                        <span class="stat">Total Products: <strong id="totalProducts">0</strong></span>
+                        <span class="stat">Active Listings: <strong id="activeListings">0</strong></span>
+                        <span class="stat">Avg. Price: <strong id="avgPrice">$0.00</strong></span>
+                    </div>
+                </div>
+                <div class="products-grid" id="productsGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-box"></i>
+                        <p>No products listed yet. Products will appear here when income streams are created.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers Tab -->
+            <div class="tab-content" id="customers">
+                <div class="customers-header">
+                    <h2>Customer Management</h2>
+                    <div class="customer-stats">
+                        <span class="stat">Total Customers: <strong id="totalCustomers">0</strong></span>
+                        <span class="stat">New This Month: <strong id="newCustomers">0</strong></span>
+                        <span class="stat">Avg. Order Value: <strong id="avgOrderValue">$0.00</strong></span>
+                    </div>
+                </div>
+                <div class="customers-grid" id="customersGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No customers yet. Customer data will appear here as sales are made.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Automation Tab -->
+            <div class="tab-content" id="automation">
+                <div class="automation-header">
+                    <h2>Automation Status</h2>
+                    <div class="automation-controls">
+                        <button class="btn btn-primary" id="startAutomationBtn">
+                            <i class="fas fa-play"></i> Start All Automation
+                        </button>
+                        <button class="btn btn-warning" id="pauseAutomationBtn">
+                            <i class="fas fa-pause"></i> Pause Automation
+                        </button>
+                    </div>
+                </div>
+                <div class="automation-grid">
+                    <div class="automation-service">
+                        <div class="service-header">
+                            <h3><i class="fas fa-search"></i> Trend Scanner</h3>
+                            <span class="status-badge" id="trendScannerStatus">Stopped</span>
+                        </div>
+                        <p>Scans social media and marketplaces for trending keywords</p>
+                        <div class="service-stats">
+                            <span>Last Scan: <strong id="lastTrendScan">Never</strong></span>
+                            <span>Trends Found: <strong id="trendsFound">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="automation-service">
+                        <div class="service-header">
+                            <h3><i class="fas fa-brain"></i> AI Analyzer</h3>
+                            <span class="status-badge" id="aiAnalyzerStatus">Stopped</span>
+                        </div>
+                        <p>Analyzes trends and generates business opportunities</p>
+                        <div class="service-stats">
+                            <span>Last Analysis: <strong id="lastAiAnalysis">Never</strong></span>
+                            <span>Opportunities Created: <strong id="opportunitiesCreated">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="automation-service">
+                        <div class="service-header">
+                            <h3><i class="fas fa-robot"></i> Marketplace Bot</h3>
+                            <span class="status-badge" id="marketplaceBotStatus">Stopped</span>
+                        </div>
+                        <p>Automatically lists products and manages marketplace operations</p>
+                        <div class="service-stats">
+                            <span>Products Listed: <strong id="productsListed">0</strong></span>
+                            <span>Active Listings: <strong id="activeMarketplaceListings">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="automation-service">
+                        <div class="service-header">
+                            <h3><i class="fas fa-chart-line"></i> Performance Monitor</h3>
+                            <span class="status-badge" id="performanceMonitorStatus">Stopped</span>
+                        </div>
+                        <p>Monitors income stream performance and optimizes pricing</p>
+                        <div class="service-stats">
+                            <span>Streams Monitored: <strong id="streamsMonitored">0</strong></span>
+                            <span>Price Optimizations: <strong id="priceOptimizations">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="opportunityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Business Opportunity Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="opportunityModalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closeOpportunityModal">Close</button>
+                <button class="btn btn-primary" id="implementOpportunityBtn">Implement Opportunity</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
