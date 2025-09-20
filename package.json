@@ -3,12 +3,8 @@
   "version": "1.0.0",
   "description": "Minimal backend to run on Render",
   "main": "src/app.js",
-  "scripts": {
-    "start": "node src/app.js"
-  },
-  "engines": {
-    "node": ">=18"
-  },
+  "scripts": { "start": "node src/app.js" },
+  "engines": { "node": ">=18" },
   "dependencies": {
     "express": "^4.18.2",
     "ws": "^8.18.0"
