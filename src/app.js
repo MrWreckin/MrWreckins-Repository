@@ -28,12 +28,11 @@ app.get('/api/streams', (req, res) => res.json([]));
 app.get('/api/products', (req, res) => res.json([]));
 app.get('/api/customers', (req, res) => res.json([]));
 
-// POST route for Scan Trends (the UI button triggers this)
+// POST route for Scan Trends (UI triggers this)
 app.post('/api/scan-trends', (req, res) => {
   res.json({ message: 'Trend scanning initiated' });
 });
 
-// Create HTTP + WebSocket servers
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 
@@ -56,20 +55,14 @@ function liveStats() {
 }
 
 wss.on('connection', (ws) => {
-  // Send a snapshot right away
-  try {
-    ws.send(JSON.stringify(liveStats()));
-  } catch (_) {}
-
+  try { ws.send(JSON.stringify(liveStats())); } catch (_) {}
   ws.on('message', (raw) => {
     try {
       const msg = JSON.parse(raw.toString());
       if (msg && msg.type === 'get_live_stats') {
         ws.send(JSON.stringify(liveStats()));
       }
-    } catch (_) {
-      // ignore non-JSON messages
-    }
+    } catch (_) {}
   });
 });
 
