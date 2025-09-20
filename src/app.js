@@ -40,6 +40,9 @@ app.post('/api/scan-trends', (req, res) => {
   res.json({ message: 'Trend scanning initiated' });
 });
 
+app.get('/api/scan-trends', (req, res) => {
+  res.json({ message: 'Scan Trends endpoint is POST in the app; returning 200 for browser check' });
+});
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 
