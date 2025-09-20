@@ -1,18 +1,12 @@
 // src/app.js
 const express = require('express');
-const http = require('http');
-const { Server } = require('ws');
 
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Rejection:', reason);
-});
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-});
+process.on('unhandledRejection', (r)=>console.error('unhandledRejection:', r));
+process.on('uncaughtException', (e)=>console.error('uncaughtException:', e));
 
 const app = express();
 
-// CORS so your IONOS site can call the Render API
+// CORS for cross-domain frontend
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -28,57 +22,24 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, uptime: process.uptime(), time: new Date().toISOString() });
 });
 
-// Minimal endpoints (return empty lists for now)
+// Minimal data endpoints
 app.get('/api/trends', (req, res) => res.json([]));
 app.get('/api/opportunities', (req, res) => res.json([]));
 app.get('/api/streams', (req, res) => res.json([]));
 app.get('/api/products', (req, res) => res.json([]));
 app.get('/api/customers', (req, res) => res.json([]));
 
-// POST route for Scan Trends (UI triggers this)
+// Scan Trends
+app.options('/api/scan-trends', (req, res) => res.sendStatus(200)); // preflight
 app.post('/api/scan-trends', (req, res) => {
   res.json({ message: 'Trend scanning initiated' });
 });
-
 app.get('/api/scan-trends', (req, res) => {
-  res.json({ message: 'Scan Trends endpoint is POST in the app; returning 200 for browser check' });
+  res.json({ message: 'Scan Trends is POST for the app; GET 200 for browser check' });
 });
+
+// Bind explicitly for Render
 const port = process.env.PORT || 3000;
-const server = http.createServer(app);
-
-// Minimal WebSocket so the dashboard shows online and can request live stats
-const wss = new Server({ server });
-
-function liveStats() {
-  return {
-    type: 'live_stats',
-    data: {
-      trends: 0,
-      opportunities: 0,
-      streams: 0,
-      customers: 0,
-      totalRevenue: 0,
-      totalProfit: 0,
-      lastUpdate: new Date().toISOString()
-    }
-  };
-}
-
-wss.on('connection', (ws) => {
-  try { ws.send(JSON.stringify(liveStats())); } catch (_) {}
-  ws.on('message', (raw) => {
-    try {
-      const msg = JSON.parse(raw.toString());
-      if (msg && msg.type === 'get_live_stats') {
-        ws.send(JSON.stringify(liveStats()));
-      }
-    } catch (_) {
-      // ignore non-JSON
-    }
-  });
-});
-
-// Bind to 0.0.0.0 for Render
-server.listen(port, '0.0.0.0', () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Backend running at http://0.0.0.0:${port}`);
 });
